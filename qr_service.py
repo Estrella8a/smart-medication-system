@@ -13,42 +13,10 @@ def scan_qr(callback):
         print("📷 Using Raspberry Pi Camera (libcamera)")
         scan_qr_rpi(callback)
     else:
-        print("💻 Using Laptop Camera (OpenCV)")
-        scan_qr_pc(callback)
-
-
-# -------------------------
-# LAPTOP (OpenCV)
-# -------------------------
-def scan_qr_pc(callback):
-
-    cap = cv2.VideoCapture(0)
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        qr_codes = decode(frame)
-
-        for qr in qr_codes:
-            data = qr.data.decode('utf-8')
-            print("QR detectado:", data)
-
-            cap.release()
-            cv2.destroyAllWindows()
-
-            callback(data)
-            return
-
-        cv2.imshow("QR Scanner", frame)
-
-        if cv2.waitKey(1) & 0xFF == 27:
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
+        print("💻 no camara")
+        # Aquí implementar una versión para webcam usando OpenCV
+        # scan_qr_webcam(callback)
+    
 
 # -------------------------
 # RASPBERRY (rpicamera)
@@ -61,41 +29,50 @@ from pyzbar.pyzbar import decode
 
 def scan_qr_rpi(callback):
 
-    print("📷 Abriendo cámara...")
+    print("📷 Abriendo preview...")
+
+    #  ABRIR PREVIEW UNA SOLA VEZ
+    preview = subprocess.Popen([
+        "rpicam-hello",
+        "-t", "0"
+    ])
 
     try:
+        print("Apunta el QR...")
+
+        time.sleep(4)  #  tiempo para que el usuario se prepare
+        # 4 segundos para que el preview esté listo y el usuario pueda apuntar el QR
+
         while True:
 
-            # 🔥 PREVIEW REAL (BLOQUEANTE)
-            subprocess.run([
-                "rpicam-hello",
-                "-t", "1500"   # 1.5 segundos
-            ])
-
-            # 🔥 CAPTURA
+            #  CAPTURA
             subprocess.run([
                 "rpicam-still",
                 "-o", "frame.jpg",
                 "--nopreview",
-                "-t", "300"
+                "-t", "500"
             ])
 
-            time.sleep(0.5)
+            time.sleep(0.7)  # (esperar escritura real)
 
             frame = cv2.imread("frame.jpg")
 
             if frame is None:
-                print("❌ No se pudo leer frame")
+                print("❌ Frame inválido")
                 continue
 
             qr_codes = decode(frame)
 
-            for qr in qr_codes:
-                data = qr.data.decode("utf-8")
+            if qr_codes:
+                data = qr_codes[0].data.decode("utf-8")
                 print("✅ QR detectado:", data)
 
+                preview.terminate()  # cerrar cámara
                 callback(data)
                 return
 
     except Exception as e:
         print("❌ Error QR:", e)
+
+    finally:
+        preview.terminate()
