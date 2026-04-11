@@ -180,8 +180,12 @@ class MainWindow:
         if self.qr_active:
             return
         self.qr_active = True
-        scan_qr(self.process_qr)      # ✅ ya corre en su propio hilo internamente
-        self.qr_active = False
+
+        def on_qr_done(data):
+            self.qr_active = False
+            self.root.after(0, lambda: self.process_qr(data))
+
+        scan_qr(on_qr_done)
             
     def confirm_with_qr(self):
         scan_qr(self.process_qr)
