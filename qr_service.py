@@ -55,53 +55,38 @@ def scan_qr_pc(callback):
 # -------------------------
 def scan_qr_rpi(callback):
 
-    print("📷 Starting camera preview (rpicam-vid)...")
+    print("📷 Using rpicam-still (frame capture mode)...")
 
-    process = subprocess.Popen(
-        [
-            "rpicam-vid",
-            "--inline",
+    while True:
+
+        # Capturar imagen
+        subprocess.run([
+            "rpicam-still",
+            "-o", "frame.jpg",
             "--nopreview",
-            "-t", "0",
-            "--width", "640",
-            "--height", "480",
-            "--framerate", "30",
-            "-o", "-"
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL
-    )
+            "-t", "100"
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    try:
-        while True:
+        frame = cv2.imread("frame.jpg")
 
-            # Leer bytes del stream
-            data = process.stdout.read(640 * 480 * 3)
+        if frame is None:
+            print("❌ No frame")
+            continue
 
-            if not data:
-                continue
+        # Mostrar preview
+        cv2.imshow("QR Scanner", frame)
 
-            frame = np.frombuffer(data, dtype=np.uint8)
-            frame = frame.reshape((480, 640, 3))
+        qr_codes = decode(frame)
 
-            # Mostrar preview
-            cv2.imshow("QR Scanner", frame)
+        for qr in qr_codes:
+            data = qr.data.decode("utf-8")
+            print("QR detectado:", data)
 
-            qr_codes = decode(frame)
+            cv2.destroyAllWindows()
+            callback(data)
+            return
 
-            for qr in qr_codes:
-                qr_data = qr.data.decode("utf-8")
-                print("QR detectado:", qr_data)
+        if cv2.waitKey(1) & 0xFF == 27:
+            break
 
-                process.terminate()
-                cv2.destroyAllWindows()
-
-                callback(qr_data)
-                return
-
-            if cv2.waitKey(1) & 0xFF == 27:
-                break
-
-    finally:
-        process.terminate()
-        cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
