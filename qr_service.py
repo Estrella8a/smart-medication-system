@@ -53,11 +53,16 @@ def scan_qr_pc(callback):
 # -------------------------
 # RASPBERRY (rpicamera)
 # -------------------------
+import subprocess
+import time
+import cv2
+from pyzbar.pyzbar import decode
+
+
 def scan_qr_rpi(callback):
 
-    print("📷 Opening camera preview...")
+    print("📷 Abriendo preview de cámara...")
 
-    # Abrir preview REAL
     preview = subprocess.Popen([
         "rpicam-hello",
         "-t", "0"
@@ -66,23 +71,27 @@ def scan_qr_rpi(callback):
     try:
         while True:
 
+            # Capturar imagen
             subprocess.run([
                 "rpicam-still",
                 "-o", "frame.jpg",
                 "--nopreview",
-                "-t", "100"
+                "-t", "200"
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            time.sleep(0.3)  # 🔥 MUY IMPORTANTE
 
             frame = cv2.imread("frame.jpg")
 
             if frame is None:
+                print("❌ No se pudo leer frame")
                 continue
 
             qr_codes = decode(frame)
 
             for qr in qr_codes:
                 data = qr.data.decode("utf-8")
-                print("QR detectado:", data)
+                print("✅ QR detectado:", data)
 
                 preview.terminate()
                 callback(data)
