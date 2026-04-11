@@ -183,7 +183,8 @@ class MainWindow:
 
         def on_qr_done(data):
             self.qr_active = False
-            self.root.after(0, lambda: self.process_qr(data))
+            self.alarm_confirmed = True        # ✅ evita que marque missed
+            self.process_qr(data)              # ya estamos en hilo principal
 
         scan_qr(on_qr_done)
             
