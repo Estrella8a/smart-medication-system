@@ -61,25 +61,26 @@ from pyzbar.pyzbar import decode
 
 def scan_qr_rpi(callback):
 
-    print("📷 Abriendo preview de cámara...")
-
-    preview = subprocess.Popen([
-        "rpicam-hello",
-        "-t", "0"
-    ])
+    print("📷 Abriendo cámara...")
 
     try:
         while True:
 
-            # Capturar imagen
+            # 🔥 PREVIEW REAL (BLOQUEANTE)
+            subprocess.run([
+                "rpicam-hello",
+                "-t", "1500"   # 1.5 segundos
+            ])
+
+            # 🔥 CAPTURA
             subprocess.run([
                 "rpicam-still",
                 "-o", "frame.jpg",
                 "--nopreview",
-                "-t", "200"
-            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                "-t", "300"
+            ])
 
-            time.sleep(0.3)  # 🔥 MUY IMPORTANTE
+            time.sleep(0.5)
 
             frame = cv2.imread("frame.jpg")
 
@@ -93,9 +94,8 @@ def scan_qr_rpi(callback):
                 data = qr.data.decode("utf-8")
                 print("✅ QR detectado:", data)
 
-                preview.terminate()
                 callback(data)
                 return
 
-    finally:
-        preview.terminate()
+    except Exception as e:
+        print("❌ Error QR:", e)
