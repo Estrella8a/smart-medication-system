@@ -8,7 +8,7 @@ cursor.execute("INSERT OR IGNORE INTO nurses (id, name) VALUES (1, 'Enfermero 1'
 cursor.execute("INSERT OR IGNORE INTO nurses (id, name) VALUES (2, 'Enfermero 2')")
 
 # Horas de RIESGO: 3pm, 4pm, 5pm y 8pm
-risky_hours = ['15', '16', '17', '20']
+risky_hours = ['15', '16', '17', '20', '21', '22']  # Agregamos 9pm y 10pm como horas de riesgo también
 
 # Horas NORMALES
 normal_hours = ['07', '08', '09', '10', '11', '12', '13', '14', '18', '19', '21', '22']
