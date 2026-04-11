@@ -8,8 +8,7 @@ try:
 except ImportError:
     IS_PI = False
 
-BUZZER_PIN = 18
-
+BUZZER_PIN = 17
 # Configuración GPIO solo en Raspberry Pi
 if IS_PI:
     GPIO.setmode(GPIO.BCM)

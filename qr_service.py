@@ -8,8 +8,7 @@ import os
 def scan_qr(callback):
 
     # Detectar si está en Raspberry
-    is_raspberry = os.path.exists("/usr/bin/libcamera-still")
-
+    is_raspberry = os.path.exists("/usr/bin/rpicam-still")
     if is_raspberry:
         print("📷 Using Raspberry Pi Camera (libcamera)")
         scan_qr_rpi(callback)
@@ -58,9 +57,9 @@ def scan_qr_rpi(callback):
 
     while True:
 
-        # Captura imagen
+        # Captura con rpicam (nuevo OS)
         subprocess.run([
-            "libcamera-still",
+            "rpicam-still",
             "-o", "frame.jpg",
             "--nopreview",
             "-t", "1"
