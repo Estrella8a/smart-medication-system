@@ -55,38 +55,39 @@ def scan_qr_pc(callback):
 # -------------------------
 def scan_qr_rpi(callback):
 
-    print("📷 Using rpicam-still (frame capture mode)...")
+    print("📷 Opening camera preview...")
 
-    while True:
+    # Abrir preview REAL del sistema
+    preview = subprocess.Popen([
+        "rpicam-hello",
+        "-t", "0"
+    ])
 
-        # Capturar imagen
-        subprocess.run([
-            "rpicam-still",
-            "-o", "frame.jpg",
-            "--nopreview",
-            "-t", "100"
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        while True:
 
-        frame = cv2.imread("frame.jpg")
+            # Capturar frame
+            subprocess.run([
+                "rpicam-still",
+                "-o", "frame.jpg",
+                "--nopreview",
+                "-t", "100"
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        if frame is None:
-            print("❌ No frame")
-            continue
+            frame = cv2.imread("frame.jpg")
 
-        # Mostrar preview
-        cv2.imshow("QR Scanner", frame)
+            if frame is None:
+                continue
 
-        qr_codes = decode(frame)
+            qr_codes = decode(frame)
 
-        for qr in qr_codes:
-            data = qr.data.decode("utf-8")
-            print("QR detectado:", data)
+            for qr in qr_codes:
+                data = qr.data.decode("utf-8")
+                print("QR detectado:", data)
 
-            cv2.destroyAllWindows()
-            callback(data)
-            return
+                preview.terminate()  # 🔥 cerrar preview REAL
+                callback(data)
+                return
 
-        if cv2.waitKey(1) & 0xFF == 27:
-            break
-
-    cv2.destroyAllWindows()
+    finally:
+        preview.terminate()
