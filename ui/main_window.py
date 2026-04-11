@@ -177,6 +177,7 @@ class MainWindow:
         text.insert("end", f"\nWorst nurse: {worst} ({r:.2f})\n")
 
     def start_qr_scan(self):
+
         if self.qr_active:
             print("⚠️ QR ya está activo")
             return
@@ -184,15 +185,13 @@ class MainWindow:
         self.qr_active = True
         print("Iniciando QR...")
 
-        import threading
         from qr_scanner import scan_qr
 
-        def run_qr():
-            scan_qr(self.process_qr)
-            self.qr_active = False  # 🔥 liberar cuando termine
+        # EJECUTAR EN MAIN THREAD
+        scan_qr(self.process_qr)
 
-        threading.Thread(target=run_qr, daemon=True).start()
-        
+        self.qr_active = False
+            
     def confirm_with_qr(self):
         scan_qr(self.process_qr)
 
