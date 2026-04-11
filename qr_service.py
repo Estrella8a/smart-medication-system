@@ -51,30 +51,57 @@ def scan_qr_pc(callback):
 
 
 # -------------------------
-# RASPBERRY (libcamera)
+# RASPBERRY (rpicamera)
 # -------------------------
 def scan_qr_rpi(callback):
 
-    while True:
+    print("📷 Starting camera preview (rpicam-vid)...")
 
-        # Captura con rpicam (nuevo OS)
-        subprocess.run([
-            "rpicam-still",
-            "-o", "frame.jpg",
+    process = subprocess.Popen(
+        [
+            "rpicam-vid",
+            "--inline",
             "--nopreview",
-            "-t", "1"
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            "-t", "0",
+            "--width", "640",
+            "--height", "480",
+            "--framerate", "30",
+            "-o", "-"
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL
+    )
 
-        frame = cv2.imread("frame.jpg")
+    try:
+        while True:
 
-        if frame is None:
-            continue
+            # Leer bytes del stream
+            data = process.stdout.read(640 * 480 * 3)
 
-        qr_codes = decode(frame)
+            if not data:
+                continue
 
-        for qr in qr_codes:
-            data = qr.data.decode('utf-8')
-            print("QR detectado:", data)
+            frame = np.frombuffer(data, dtype=np.uint8)
+            frame = frame.reshape((480, 640, 3))
 
-            callback(data)
-            return
+            # Mostrar preview
+            cv2.imshow("QR Scanner", frame)
+
+            qr_codes = decode(frame)
+
+            for qr in qr_codes:
+                qr_data = qr.data.decode("utf-8")
+                print("QR detectado:", qr_data)
+
+                process.terminate()
+                cv2.destroyAllWindows()
+
+                callback(qr_data)
+                return
+
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
+
+    finally:
+        process.terminate()
+        cv2.destroyAllWindows()
