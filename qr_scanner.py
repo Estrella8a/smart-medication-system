@@ -1,6 +1,7 @@
 from pyzbar.pyzbar import decode
 import time
 import threading
+import cv2
 
 def scan_qr(callback):
     threading.Thread(target=_scan, args=(callback,), daemon=True).start()
