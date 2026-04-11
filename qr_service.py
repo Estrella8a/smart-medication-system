@@ -57,7 +57,7 @@ def scan_qr_rpi(callback):
 
     print("📷 Opening camera preview...")
 
-    # Abrir preview REAL del sistema
+    # Abrir preview REAL
     preview = subprocess.Popen([
         "rpicam-hello",
         "-t", "0"
@@ -66,7 +66,6 @@ def scan_qr_rpi(callback):
     try:
         while True:
 
-            # Capturar frame
             subprocess.run([
                 "rpicam-still",
                 "-o", "frame.jpg",
@@ -85,7 +84,7 @@ def scan_qr_rpi(callback):
                 data = qr.data.decode("utf-8")
                 print("QR detectado:", data)
 
-                preview.terminate()  # 🔥 cerrar preview REAL
+                preview.terminate()
                 callback(data)
                 return
 
