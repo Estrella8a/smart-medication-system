@@ -11,7 +11,7 @@ import datetime
 
 from ui.patient_panel import PatientPanel
 
-from qr_service import scan_qr
+from qr_scanner import scan_qr
 from nurse_service import get_nurse_by_id
 from dose_service import register_dose
 from database import connect_db
@@ -177,19 +177,10 @@ class MainWindow:
         text.insert("end", f"\nWorst nurse: {worst} ({r:.2f})\n")
 
     def start_qr_scan(self):
-
         if self.qr_active:
-            print("⚠️ QR ya está activo")
             return
-
         self.qr_active = True
-        print("Iniciando QR...")
-
-        from qr_scanner import scan_qr
-
-        # EJECUTAR EN MAIN THREAD
-        scan_qr(self.process_qr)
-
+        scan_qr(self.process_qr)      # ✅ ya corre en su propio hilo internamente
         self.qr_active = False
             
     def confirm_with_qr(self):
