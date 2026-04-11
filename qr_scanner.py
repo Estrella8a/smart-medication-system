@@ -1,20 +1,22 @@
+import cv2
 from pyzbar.pyzbar import decode
+from picamera2 import Picamera2
 import time
 import threading
-import cv2
 
 def scan_qr(callback):
     threading.Thread(target=_scan, args=(callback,), daemon=True).start()
 
 def _scan(callback):
-    cap = cv2.VideoCapture(0)
+    print("📷 Iniciando cámara...")
 
-    if not cap.isOpened():
-        print("❌ No se pudo abrir la cámara")
-        return
-
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    picam2 = Picamera2()
+    config = picam2.create_preview_configuration(
+        main={"size": (640, 480), "format": "RGB888"}
+    )
+    picam2.configure(config)
+    picam2.start()
+    time.sleep(1)
 
     TIMEOUT = 25
     start_time = time.time()
@@ -22,43 +24,27 @@ def _scan(callback):
 
     print("📷 Apunta el QR a la cámara...")
 
-    cv2.namedWindow("Escanear QR - Q para cancelar", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Escanear QR - Q para cancelar", 640, 480)
-
     while True:
         if time.time() - start_time > TIMEOUT:
             print("⏰ Timeout QR sin detectar")
             break
 
-        ret, frame = cap.read()
-        if not ret:
+        frame = picam2.capture_array()
+
+        if frame is None:
             continue
 
         qr_codes = decode(frame)
         for qr in qr_codes:
             detected = qr.data.decode("utf-8")
-            pts = [(p.x, p.y) for p in qr.polygon]
-            for i in range(len(pts)):
-                cv2.line(frame, pts[i], pts[(i+1) % len(pts)], (0,255,0), 3)
-            cv2.putText(frame, f"✅ {detected}",
-                        (qr.rect.left, qr.rect.top - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0), 2)
-
-        cv2.putText(frame, "Apunta el QR | Q = cancelar",
-                    (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.7, (255,255,255), 2)
-
-        cv2.imshow("Escanear QR - Q para cancelar", frame)
+            print(f"✅ QR detectado: {detected}")
+            break
 
         if detected:
-            time.sleep(0.4)
             break
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+    picam2.stop()
+    picam2.close()
 
     if detected:
         callback(detected)
