@@ -15,7 +15,7 @@ def register_dose(patient_id, medication_id, nurse_id, status):
         patient_id,
         medication_id,
         nurse_id,
-        current_time,   # 🔥 ESTE ES EL FIX
+        current_time, 
         status
     ))
 

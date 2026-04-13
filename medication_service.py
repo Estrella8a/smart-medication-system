@@ -1,5 +1,4 @@
 from database import connect_db
-from database import connect_db
 import sqlite3
 
 def medication_exists(patient_id, name):
@@ -17,8 +16,6 @@ def medication_exists(patient_id, name):
 # ---------------------
 # CREATE // ADD MEDICATION
 # ---------------------
-
-from database import connect_db
 
 def add_medication(patient_id, name, dosage):
     conn = connect_db()
