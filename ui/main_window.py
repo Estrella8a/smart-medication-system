@@ -141,8 +141,6 @@ class MainWindow:
             command=self.confirm_pending_manual
         )
         self.confirm_manual_button.grid(row=0, column=1, padx=10, sticky="ew")
-        # 👇 ESTE YA NO SE OCULTA
-        # siempre visible
 
         # =========================
         # 🧩 CONTENIDO PRINCIPAL
@@ -183,8 +181,8 @@ class MainWindow:
 
         def on_qr_done(data):
             self.qr_active = False
-            self.alarm_confirmed = True        # ✅ evita que marque missed
-            self.process_qr(data)              # ya estamos en hilo principal
+            self.alarm_confirmed = True  
+            self.process_qr(data)              
 
         scan_qr(on_qr_done)
             
@@ -335,7 +333,7 @@ class MainWindow:
             self.current_alarm = None
             self.alarm_confirmed = True
 
-            return  # 🔥 corta aquí toda la lógica
+            return  
 
         # -------------------------
         # 🔔 ALERTA NORMAL
