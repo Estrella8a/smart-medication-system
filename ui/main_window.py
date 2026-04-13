@@ -18,21 +18,9 @@ from database import connect_db
 import threading
 
 
-import os
-import platform
-
-def ajustar_orientacion():
-    # Solo intentamos r otar si estamos en Linux (la Raspberry)
-    if platform.system() == "Linux":
-        print("🔄 Rotando pantalla a modo vertical (izquierda)...")
-        # El comando 'xrandr' gira la interfaz gráfica
-        os.system("DISPLAY=:0 xrandr --output HDMI-1 --rotate left")
-
-# En el __init__ de tu clase MainWindow, llama a la función:
 class MainWindow:
-    def __init__(self, root):
-        ajustar_orientacion()
 
+    def __init__(self, root):
         self.root = root
         self.root.title("Smart Medication System")
         self.current_alarm = None
