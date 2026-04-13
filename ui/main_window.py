@@ -5,6 +5,8 @@ from tkinter import messagebox, simpledialog
 import queue
 
 
+import sys
+import os
 import tkinter as tk
 import queue
 import datetime
