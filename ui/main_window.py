@@ -32,7 +32,6 @@ def ajustar_orientacion():
 class MainWindow:
     def __init__(self, root):
         ajustar_orientacion()
-        self.root = root
 
         self.root = root
         self.root.title("Smart Medication System")
